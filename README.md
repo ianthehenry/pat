@@ -8,7 +8,7 @@ Here's a quick diff between `pat/match` and Janet's built-in `match`:
 - `pat/match` supports pattern aliases and refinements with `and`
 - `[x y z]` patterns match exactly, instead of matching prefixes of their input
 - `pat/match` raises an error if none of the provided patterns match the input, instead of returning `nil` (you can still specify `nil` as an explicit default if you want)
-- `(@ foo)` is spelled `(= foo)`, or `,foo`
+- `(@ foo)` is spelled `(= foo)` or `,foo`
 - there's a different syntax for attaching conditions to patterns (see "predicate and expression patterns" below)
 
 # Symbol patterns
