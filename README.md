@@ -172,7 +172,7 @@ Similarly, you cannot write duplicate keys in a struct pattern:
   {:a a :a 10} ...)
 ```
 
-All but the final instance of a key is erased at Janet parse time, so `pat` cannot even warn you if you make this mistake.
+All but the final instance of a key is erased at Janet parse time, so `pat` cannot even warn you if you make this mistake. If you want to match multiple patterns against the same key, use an `(and)` pattern.
 
 # Operator patterns
 
