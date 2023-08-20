@@ -3,7 +3,6 @@
 (def- *subject* (gensym))
 (def- *success* (gensym))
 (def- *result* (gensym))
-(def- *pattern-key* (gensym))
 
 (defmacro- scope :fmt/block [body &opt if-broken]
   (with-syms [$success $result]
@@ -183,27 +182,27 @@
 (defn- optional-pattern [pattern]
   (match pattern ['? p] p))
 
-(defn- compile-struct-value-pattern [pattern]
-  (if (= pattern '&)
-    [~(def ,(dyn *pattern-key*) ,(subject))]
-    (compile-pattern pattern)))
-
 (defn- symbol-of-key [key]
   (match (type key)
     :keyword (symbol key)
     :symbol key
     nil))
 
+(defn- compile-struct-value-pattern [pattern key]
+  (def $sym (symbol-of-key key))
+  (if (and (= pattern '&) $sym)
+    [~(def ,$sym ,(subject))]
+    (compile-pattern pattern)))
+
 (defn- compile-dictionary-pattern [pattern]
   (with-syms [$dict]
     [~(as-macro ,alias ,$dict ,(subject))
      ;(catseq [[key pattern] :pairs pattern]
        (with-subject ~(,$dict ,key)
-        (with-dyns [*pattern-key* (symbol-of-key key)]
-          (if-let [pattern (optional-pattern pattern)]
-            (compile-struct-value-pattern pattern)
-            [~(unless (has-key? ,$dict ,key) (as-macro ,fail))
-             ;(compile-struct-value-pattern pattern)]))))]))
+        (if-let [pattern (optional-pattern pattern)]
+          (compile-struct-value-pattern pattern key)
+          [~(unless (has-key? ,$dict ,key) (as-macro ,fail))
+           ;(compile-struct-value-pattern pattern key)])))]))
 
 (defn- compile-symbol-pattern [pattern]
   (case pattern
