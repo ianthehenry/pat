@@ -9,6 +9,8 @@ Here's a quick diff between `pat/match` and Janet's built-in `match`:
 - `(@ foo)` is spelled `(= foo)`
 - parens mean something completely different (see "operator patterns" below)
 
+`pat/match` is a bit more powerful than the built-in `match`, supporting pattern alternatives (with `or`) and pattern aliases (with `and`), making it just as expressive as patterns in OCaml or Haskell.
+
 # Symbol patterns
 
 Symbols match any values, and bind that value.
