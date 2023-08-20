@@ -158,6 +158,8 @@
     'short-fn (compile-predicate args)
     'and (compile-and args)
     'quote (compile-equality pattern)
+    'quasiquote (compile-equality pattern)
+    'unquote (compile-equality ;args)
     'or (compile-or args)
     '= (compile-equality ;args)
     (errorf "unknown operator %q in pattern %q" instr pattern)))

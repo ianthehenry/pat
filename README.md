@@ -8,7 +8,7 @@ Here's a quick diff between `pat/match` and Janet's built-in `match`:
 - `pat/match` supports pattern aliases and refinements with `and`
 - `[x y z]` patterns match exactly, instead of matching prefixes of their input
 - `pat/match` raises an error if none of the provided patterns match the input, instead of returning `nil` (you can still specify `nil` as an explicit default if you want)
-- `(@ foo)` is spelled `(= foo)`
+- `(@ foo)` is spelled `(= foo)`, or `,foo`
 - there's a different syntax for attaching conditions to patterns (see "predicate and expression patterns" below)
 
 # Symbol patterns
@@ -179,7 +179,7 @@ Note that, due to the way Janet abstract syntax trees work, there is no way to g
   {:a a :b |(> $ a)} ...)
 ```
 
-Such a construct is allowed using `[]` patterns or `and` patterns, but not `{}` patterns: the order that the keys in a struct appear is not part of the parsed abstract syntax tree that `pat` operates on. This *might* work, sometimes, but it's fragile, and working code could break in a future version of Janet.
+Such a construct is allowed using `[]` patterns or `and` patterns, but not `{}` patterns: the order that the keys in a struct appear is not part of the parsed abstract syntax tree that `pat` operates on. This *might* work, sometimes, but it's fragile, and working code could break in a future version of Janet. `pat/match` will not prevent you from doing this, because I don't know how to do so without incurring a runtime cost.
 
 Similarly, you cannot write duplicate keys in a struct pattern:
 
@@ -237,7 +237,7 @@ But this will fail to compile:
 
 You can use `_` to perform structural matching without binding any new symbols.
 
-## `(= value)`
+## `(= value)`, `(unquote value)`
 
 Check a value for equality:
 
@@ -247,7 +247,14 @@ Check a value for equality:
   (= origin) :origin)
 ```
 
-This is the same as:
+Or:
+
+```janet
+(pat/match point
+  ,origin :origin)
+```
+
+These are equivalent to:
 
 ```janet
 (pat/match point

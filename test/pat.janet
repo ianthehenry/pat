@@ -125,6 +125,15 @@
   (test (match 'foo 'foo :ok) :ok)
   (test (match ['foo] '(foo) :ok) :ok))
 
+(deftest "quasiquoted patterns"
+  (def x 10)
+  (test (match 'foo ~foo :ok) :ok)
+  (test (match [10] ~(,x) :ok) :ok))
+
+(deftest "unquote patterns"
+  (def x 10)
+  (test (match 10 ,x :ok) :ok))
+
 (deftest "quoted patterns respect tuple bracketedness"
   (test-error (match ['foo] '[foo] :ok) "(foo) did not match"))
 
