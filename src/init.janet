@@ -155,12 +155,12 @@
     (errorf "illegal pattern %q" pattern))
   (def [instr & args] pattern)
   (case instr
-    'short-fn (compile-predicate args)
     'and (compile-and args)
+    'or (compile-or args)
+    'short-fn (compile-predicate args)
     'quote (compile-equality pattern)
     'quasiquote (compile-equality pattern)
     'unquote (compile-equality ;args)
-    'or (compile-or args)
     '= (compile-equality ;args)
     (errorf "unknown operator %q in pattern %q" instr pattern)))
 
