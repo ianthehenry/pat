@@ -121,6 +121,13 @@
   (test (match true true :ok) :ok)
   (test-error (match true false :ok) "true did not match"))
 
+(deftest "quoted patterns"
+  (test (match 'foo 'foo :ok) :ok)
+  (test (match ['foo] '(foo) :ok) :ok))
+
+(deftest "quoted patterns respect tuple bracketedness"
+  (test-error (match ['foo] '[foo] :ok) "(foo) did not match"))
+
 (deftest "dictionary patterns"
   (test (match {:x 1} {:x x} x) 1)
   (test (match {:x 1 :y 2} {:x x :y y} (+ x y)) 3)
