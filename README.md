@@ -66,7 +66,9 @@ You can also write arbitrary expressions that don't refer to the value being mat
 # :trivial
 ```
 
-The way this works is that `short-fn`s of zero arguments are invoked, and if they return a function or cfunction, then their result is invoked again with the value being matched. Otherwise, if they don't return a function or cfunction, their result is interpreted as a normal truthy or falsey value.
+A mental model for how this works: `short-fn`s of zero arguments are invoked, and if they return a function or cfunction, then their result is invoked again with the value being matched. Otherwise, if they don't return a function or cfunction, their result is interpreted as a normal truthy or falsey value.
+
+But in practice, `pat/match` will optimize away the `short-fn` allocation in all practical cases where your pattern is a constant expression or predicate.
 
 # Tuple and array patterns
 

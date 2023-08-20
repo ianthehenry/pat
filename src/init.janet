@@ -112,20 +112,40 @@
 (defn- compile-and [patterns]
   (mapcat compile-pattern patterns))
 
+(defn- check [f x]
+  (if (or (function? f) (cfunction? f))
+    (f x)
+    f))
+
 (defn- check-predicate [f x]
   (if (= ((disasm f) :max-arity) 0)
-    (let [f (f)]
-      (if (or (function? f) (cfunction? f))
-        (f x)
-        f))
+    (check (f) x)
     (f x)))
 
 (defn- subject []
   (array/peek (dyn *subject*)))
 
-(defn- compile-predicate [body]
-  [~(unless (,check-predicate (short-fn ,;body) ,(subject))
-      (as-macro ,fail))])
+(defn- definitely-nullary? [body]
+  (var result true)
+  (prewalk (fn [x]
+    (when (and (symbol? x) (string/has-prefix? "$" x))
+      (set result false))
+    x)
+    body)
+  result)
+
+(test (definitely-nullary? ~(> $ 1)) false)
+(test (definitely-nullary? ~(> x 1)) true)
+(test (definitely-nullary? ~(|($ 1) 1)) false)
+
+(defn- compile-predicate [args]
+  (assert (= (length args) 1) "too many arguments to short-fn")
+  (def [body] args)
+  [(if (definitely-nullary? body)
+     ~(unless (,check ,body ,(subject))
+       (as-macro ,fail))
+     ~(unless (,check-predicate (short-fn ,body) ,(subject))
+       (as-macro ,fail)))])
 
 (defn- compile-equality [& args]
   [~(unless (= ,(subject) ,;args) (as-macro ,fail))])
