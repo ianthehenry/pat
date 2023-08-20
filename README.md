@@ -219,14 +219,6 @@ But this will fail to compile:
 
 You can use `_` to perform structural matching without binding any new symbols.
 
-Or to check conditions, like "`when` patterns" in other languages:
-
-```janet
-(pat/match point
-  (and [x y] |(< x y))
-    (print "ascending order"))
-```
-
 ## `(= value)`
 
 Check a value for equality:
@@ -239,7 +231,7 @@ Check a value for equality:
 
 This is the same as:
 
-```
+```janet
 (pat/match point
   |(= origin $) :origin)
 ```
