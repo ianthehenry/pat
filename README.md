@@ -4,14 +4,16 @@ A supercharged `match` macro for Janet.
 
 Here's a quick diff between `pat/match` and Janet's built-in `match`:
 
+- `pat/match` supports pattern alternatives with `or`
+- `pat/match` supports pattern aliases and refinements with `and`
 - `[x y z]` patterns match exactly, instead of matching prefixes of their input
-- failure to match any pattern raises an error by default, instead of returning `nil`
+- `pat/match` raises an error if none of the provided patterns match the input, instead of returning `nil` (you can still specify `nil` as an explicit default if you want)
 - `(@ foo)` is spelled `(= foo)`
-- parens mean something completely different (see "operator patterns" below)
-
-`pat/match` is a bit more powerful than the built-in `match`, supporting pattern alternatives (with `or`) and pattern aliases (with `and`), making it just as expressive as patterns in OCaml or Haskell.
+- there's a different syntax for attaching conditions to patterns (see "predicate and expression patterns" below)
 
 # Symbol patterns
+
+> Symbol patterns are the same as the native `match`, except that `&` is not a valid symbol in `pat/match`, while `@` is.
 
 Symbols match any values, and bind that value.
 
@@ -28,14 +30,22 @@ There are two exceptions:
 
 # Literal patterns
 
-Numbers, strings, keywords, and booleans match values exactly.
+> The same as the native `match`.
+
+Numbers, strings, keywords, and booleans match values exactly. All quoted values -- including symbols -- match exactly as well.
 
 ```janet
 (pat/match (type [1 2 3])
   :tuple "yep")
+
+(pat/match operator
+  '+ "plus"
+  '- "minus")
 ```
 
 # Predicate and expression patterns
+
+> Quite a bit different than the native `match`.
 
 Use `|` to evaluate arbitrary predicates or expressions. For example:
 
@@ -71,6 +81,8 @@ A mental model for how this works: `short-fn`s of zero arguments are invoked, an
 But in practice, `pat/match` will optimize away the `short-fn` allocation in all practical cases where your pattern is a constant expression or predicate.
 
 # Tuple and array patterns
+
+> Unlike the native `match`, tuple patterns without a `&` clause must match exactly with their input, instead of a prefix of their input. `pat/match` also supports arbitrary patterns after the `&`, while the native match only supports a symbol.
 
 ```janet
 (def values [1 2])
@@ -111,7 +123,9 @@ You can put any pattern after the `&`, not just a symbol. For example, this patt
     (+ car cadr))
 ```
 
-# Structs and table patterns
+# Struct and table patterns
+
+> Basically the same as the native `match`, but supports optional keys and field punning.
 
 ```janet
 (def point {:x 1 :y 2})
@@ -177,6 +191,8 @@ Similarly, you cannot write duplicate keys in a struct pattern:
 All but the final instance of a key is erased at Janet parse time, so `pat` cannot even warn you if you make this mistake. If you want to match multiple patterns against the same key, use an `(and)` pattern.
 
 # Operator patterns
+
+> Operator patterns replace the native `match`'s equality patterns, like `(@ foo)` and condition patterns, like `(foo (> foo 0))`.
 
 ## `(and patterns...)`
 
