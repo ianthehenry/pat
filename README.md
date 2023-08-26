@@ -181,6 +181,13 @@ Note that, due to the way Janet abstract syntax trees work, there is no way to g
 
 Such a construct is allowed using `[]` patterns or `and` patterns, but not `{}` patterns: the order that the keys in a struct appear is not part of the parsed abstract syntax tree that `pat` operates on. This *might* work, sometimes, but it's fragile, and working code could break in a future version of Janet. `pat/match` will not prevent you from doing this, because I don't know how to do so without incurring a runtime cost.
 
+If you really need to do this, you can use `and` to sequence each step of the match:
+
+```janet
+(pat/match foo
+  (and {:a a} {:b |(> $ a)}) ...)
+```
+
 Similarly, you cannot write duplicate keys in a struct pattern:
 
 ```janet
@@ -188,7 +195,12 @@ Similarly, you cannot write duplicate keys in a struct pattern:
   {:a a :a 10} ...)
 ```
 
-All but the final instance of a key is erased at Janet parse time, so `pat` cannot even warn you if you make this mistake. If you want to match multiple patterns against the same key, use an `(and)` pattern.
+Janet erases the first instance of `:a` at parse time, so `pat` can't even warn you if you make this mistake. If you want to match multiple patterns against the same key, use an `(and)` pattern instead:
+
+```janet
+(pat/match foo
+  {:a (and a 10)} ...)
+```
 
 # Operator patterns
 
