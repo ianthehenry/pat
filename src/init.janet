@@ -117,10 +117,7 @@
 (defn- compile-and [patterns]
   (mapcat compile-pattern patterns))
 
-(defn- compile-not [patterns]
-  (when (not= (length patterns) 1)
-    (error "not needs exactly one pattern"))
-  (def pattern (patterns 0))
+(defn- compile-not [pattern]
   (def body (compile-pattern pattern))
   (unless (empty? (definitions body))
     (error "not patterns cannot create bindings"))
@@ -141,6 +138,13 @@
 
 (defn- subject []
   (array/peek (dyn *subject*)))
+
+(defmacro- with-subject [subject & exprs]
+  (with-syms [$result] ~(do
+    (array/push (dyn *subject*) ,subject)
+    (def ,$result ,;exprs)
+    (array/pop (dyn *subject*))
+    ,$result)))
 
 (defn- definitely-nullary? [body]
   (var result true)
@@ -170,12 +174,16 @@
 (defn- compile-inequality [& args]
   [~(when (= ,(subject) ,;args) (as-macro ,fail))])
 
+(defn- compile-map [f pattern]
+  (with-subject ~(,f ,(subject))
+    (compile-pattern pattern)))
+
 (defn- compile-operator-pattern [pattern]
   (when (empty? pattern)
     (errorf "illegal pattern %q" pattern))
   (def [instr & args] pattern)
   (case instr
-    'not (compile-not args)
+    'not (compile-not ;args)
     'and (compile-and args)
     'or (compile-or args)
     'short-fn (compile-predicate args)
@@ -184,14 +192,8 @@
     'unquote (compile-equality ;args)
     '= (compile-equality ;args)
     'not= (compile-inequality ;args)
+    'map (compile-map ;args)
     (errorf "unknown operator %q in pattern %q" instr pattern)))
-
-(defmacro- with-subject [subject & exprs]
-  (with-syms [$result] ~(do
-    (array/push (dyn *subject*) ,subject)
-    (def ,$result ,;exprs)
-    (array/pop (dyn *subject*))
-    ,$result)))
 
 (defn- slice [list i]
   (if (array? list)

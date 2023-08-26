@@ -154,9 +154,14 @@
   (test (match [[1]] [(not [_])] :yes :no) :no)
   (test (match [[1]] [(not [_ _])] :yes :no) :yes)
   (test-error (macex '(match foo (not x) 0)) "not patterns cannot create bindings")
-  (test-error (macex '(match foo (not x y) 0)) "not needs exactly one pattern")
-  (test-error (macex '(match foo (not) 0)) "not needs exactly one pattern"))
+  (test-error (macex '(match foo (not x y) 0)) "<function compile-not> called with 2 arguments, expected 1")
+  (test-error (macex '(match foo (not) 0)) "<function compile-not> called with 0 arguments, expected 1"))
 
 (deftest "not="
   (test (match 1 (not= 2) :yes :no) :yes)
   (test (match 2 (not= 2) :yes :no) :no))
+
+(deftest "map"
+  (test (match [1 2 3] (map first 1) :yes :no) :yes)
+  (test (match [1 2 3] (map first 2) :yes :no) :no)
+  (test (match [1 2 3] (map max-of |odd?) :yes :no) :yes))

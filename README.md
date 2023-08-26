@@ -280,7 +280,7 @@ But a little more convenient to write.
 Invert a pattern:
 
 ```janet
-(def origin [0 0 0])
+(def point [0 0 0])
 (pat/match point
   (not [_ _]) :not-2d)
 ```
@@ -290,3 +290,18 @@ The pattern inside `not` cannot create any bindings.
 ## `(not= pat)`
 
 Slightly more efficient shorthand for `(not (= x))`.
+
+```janet
+(pat/match value
+  (and x (not= nil)) (print x))
+```
+
+## `(map f pat)`
+
+Call `f` with the value being matched, and match the pattern against the result, like "view patterns" in other languages.
+
+```janet
+(match numbers
+  (map max-of (and big |prime?)) (print big)
+  (error "largest number must be prime"))
+```
