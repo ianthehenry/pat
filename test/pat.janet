@@ -144,3 +144,19 @@
   (test (match {:x 1} {:x x :y (? y)} [x y]) [1 nil])
   (test (match {:x 1} {:x &} x) 1)
   (test (match {:x 1} {:x & :y (? &)} [x y]) [1 nil]))
+
+(deftest "not"
+  (test (match 1 (and (not 2) (not 3)) :yes :no) :yes)
+  (test (match [1] (not []) :yes :no) :yes)
+  (test (match [] (not [_]) :yes :no) :yes)
+  (test (match [1] (not [_]) :yes :no) :no)
+  (test (match [[1]] (not [_]) :yes :no) :no)
+  (test (match [[1]] [(not [_])] :yes :no) :no)
+  (test (match [[1]] [(not [_ _])] :yes :no) :yes)
+  (test-error (macex '(match foo (not x) 0)) "not patterns cannot create bindings")
+  (test-error (macex '(match foo (not x y) 0)) "not needs exactly one pattern")
+  (test-error (macex '(match foo (not) 0)) "not needs exactly one pattern"))
+
+(deftest "not="
+  (test (match 1 (not= 2) :yes :no) :yes)
+  (test (match 2 (not= 2) :yes :no) :no))

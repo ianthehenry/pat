@@ -4,7 +4,9 @@
 (def- *success* (gensym))
 (def- *result* (gensym))
 
-(defmacro- scope :fmt/block [body &opt if-broken]
+(defmacro- scope :fmt/block [body &opt if-broken invert]
+  (default invert false)
+  (def which-if (if invert 'if-not 'if))
   (with-syms [$success $result]
     ~(do
       (var ,$success true)
@@ -14,7 +16,7 @@
           ,(with-dyns [*success* $success *result* $result]
             (macex body))))
         (break))
-      (if ,$success
+      (,which-if ,$success
         ,$result
         ,if-broken))))
 
@@ -87,15 +89,18 @@
         (this :pattern) (tuple/slice (keys (this :syms))))))
   (canonical :syms))
 
+(defn- definitions [body]
+  (def symbols-defined @{})
+  (each form body
+    (when (and (> (length form) 2) (= (form 0) 'def))
+      (put symbols-defined (form 1) true)))
+  (table/to-struct symbols-defined))
+
 (defn- compile-or [patterns]
   (def compiled (seq [pattern :in patterns]
     (def body (compile-pattern pattern))
-    (def symbols-defined @{})
-    (each form body
-      (when (and (> (length form) 2) (= (form 0) 'def))
-        (put symbols-defined (form 1) true)))
     {:body body
-     :syms (table/to-struct symbols-defined)
+     :syms (definitions body)
      :pattern pattern}))
   (def syms (assert-same-syms compiled))
   (def sym-to-gen (tabseq [sym :keys syms] sym (gensym)))
@@ -111,6 +116,18 @@
 
 (defn- compile-and [patterns]
   (mapcat compile-pattern patterns))
+
+(defn- compile-not [patterns]
+  (when (not= (length patterns) 1)
+    (error "not needs exactly one pattern"))
+  (def pattern (patterns 0))
+  (def body (compile-pattern pattern))
+  (unless (empty? (definitions body))
+    (error "not patterns cannot create bindings"))
+  [~(as-macro ,scope
+      (do ,;body)
+      (as-macro ,fail)
+      true)])
 
 (defn- check [f x]
   (if (or (function? f) (cfunction? f))
@@ -150,11 +167,15 @@
 (defn- compile-equality [& args]
   [~(unless (= ,(subject) ,;args) (as-macro ,fail))])
 
+(defn- compile-inequality [& args]
+  [~(when (= ,(subject) ,;args) (as-macro ,fail))])
+
 (defn- compile-operator-pattern [pattern]
   (when (empty? pattern)
     (errorf "illegal pattern %q" pattern))
   (def [instr & args] pattern)
   (case instr
+    'not (compile-not args)
     'and (compile-and args)
     'or (compile-or args)
     'short-fn (compile-predicate args)
@@ -162,6 +183,7 @@
     'quasiquote (compile-equality pattern)
     'unquote (compile-equality ;args)
     '= (compile-equality ;args)
+    'not= (compile-inequality ;args)
     (errorf "unknown operator %q in pattern %q" instr pattern)))
 
 (defmacro- with-subject [subject & exprs]
@@ -356,3 +378,15 @@
           (as-macro @fail))
         (def x (<1> :x))
         x))))
+
+(deftest "not expansion"
+  (test-macro (match1 foo (not nil) :ok)
+    (scope
+      (do
+        (as-macro @scope
+          (do
+            (unless (= foo nil)
+              (as-macro @fail)))
+          (as-macro @fail)
+          true)
+        :ok))))

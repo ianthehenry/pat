@@ -274,3 +274,19 @@ These are equivalent to:
 ```
 
 But a little more convenient to write.
+
+## `(not pat)`
+
+Invert a pattern:
+
+```janet
+(def origin [0 0 0])
+(pat/match point
+  (not [_ _]) :not-2d)
+```
+
+The pattern inside `not` cannot create any bindings.
+
+## `(not= pat)`
+
+Slightly more efficient shorthand for `(not (= x))`.
