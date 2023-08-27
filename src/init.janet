@@ -159,9 +159,7 @@
 (test (definitely-nullary? ~(> x 1)) true)
 (test (definitely-nullary? ~(|($ 1) 1)) false)
 
-(defn- compile-predicate [args]
-  (assert (= (length args) 1) "too many arguments to short-fn")
-  (def [body] args)
+(defn- compile-predicate [body]
   [(if (definitely-nullary? body)
      ~(unless (,check ,body ,(subject))
        (as-macro ,fail))
@@ -175,8 +173,10 @@
   [~(when (= ,(subject) ,;args) (as-macro ,fail))])
 
 (defn- compile-map [f pattern]
-  (with-subject ~(,f ,(subject))
-    (compile-pattern pattern)))
+  (with-syms [$subject]
+    [~(as-macro ,alias ,$subject (,f ,(subject)))
+    ;(with-subject $subject
+      (compile-pattern pattern))]))
 
 (defn- compile-operator-pattern [pattern]
   (when (empty? pattern)
@@ -186,7 +186,7 @@
     'not (compile-not ;args)
     'and (compile-and args)
     'or (compile-or args)
-    'short-fn (compile-predicate args)
+    'short-fn (compile-predicate ;args)
     'quote (compile-equality pattern)
     'quasiquote (compile-equality pattern)
     'unquote (compile-equality ;args)
