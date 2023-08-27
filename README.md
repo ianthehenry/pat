@@ -4,16 +4,18 @@ A supercharged `match` macro for Janet.
 
 Here's a quick diff between `pat/match` and Janet's built-in `match`:
 
-- `pat/match` supports pattern alternatives with `or`
-- `pat/match` supports pattern aliases and refinements with `and`
 - `[x y z]` patterns match exactly, instead of matching prefixes of their input
-- `pat/match` raises an error if none of the provided patterns match the input, instead of returning `nil` (you can still specify `nil` as an explicit default if you want)
-- `(@ foo)` is spelled `(= foo)` or `,foo`
+- `pat/match` supports pattern alternatives with `or`
+- `pat/match` supports field punning in dictionary patterns, with `{:foo &}`
+- `pat/match` supports pattern aliases and refinements with `and`
+- `pat/match` supports optional fields in dictionary patterns, with `{:x (? x)}`
+- `pat/match` supports "view patterns" with `map`
+- `pat/match` raises an error when no patterns match (unless you specify an explicit default)
 - there's a different syntax for attaching conditions to patterns (see "predicate and expression patterns" below)
 
 # Symbol patterns
 
-> Symbol patterns are the same as the native `match`, except that `&` is not a valid symbol in `pat/match`, while `@` is.
+> Symbol patterns are the same as the native `match`, except that `&` is not a valid symbol in `pat/match`, while `@` always is.
 
 Symbols match any values, and bind that value.
 
