@@ -1,6 +1,15 @@
 # `pat/match`
 
-A supercharged `match` macro for Janet.
+A supercharged `match` macro for Janet. Install it with `jpm`:
+
+```janet
+# project.janet
+(declare-project
+  :dependencies [
+    {:url "https://github.com/ianthehenry/pat.git"
+     :tag "v1.0.0"}
+  ])
+```
 
 Here's a quick diff between `pat/match` and Janet's built-in `match`:
 
@@ -307,3 +316,9 @@ Call `f` with the value being matched, and match the pattern against the result,
   (map max-of (and big |prime?)) (print big)
   (error "largest number must be prime"))
 ```
+
+# Changelog
+
+## v1.0.0 2023-08-27
+
+- Initial release.
