@@ -146,7 +146,7 @@ You can put any pattern after the `&`, not just a symbol. For example, this patt
 
 ## Optional matching
 
-Because structs and tables cannot contain `nil` as a pattern, the following can never match:
+Because structs and tables cannot contain `nil` values, the following can never match:
 
 ```janet
 (pat/match {:foo nil}
