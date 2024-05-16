@@ -7,7 +7,7 @@ A supercharged `match` macro for Janet. Install it with `jpm`:
 (declare-project
   :dependencies [
     {:url "https://github.com/ianthehenry/pat.git"
-     :tag "v1.0.0"}
+     :tag "v1.0.1"}
   ])
 ```
 
@@ -318,6 +318,10 @@ Call `f` with the value being matched, and match the pattern against the result,
 ```
 
 # Changelog
+
+## v1.0.1 2024-05-15
+
+- Fix a bug where non-optional dictionary patterns wouldn't work.
 
 ## v1.0.0 2023-08-27
 
