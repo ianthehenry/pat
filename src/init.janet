@@ -246,8 +246,8 @@
     [~(as-macro ,alias ,$dict ,(subject))
      ;(catseq [[key pattern] :pairs pattern]
        (with-subject ~(,$dict ,key)
-        (if-let [pattern (optional-pattern pattern)]
-          (compile-struct-value-pattern pattern key)
+        (if-let [opt-pattern (optional-pattern pattern)]
+          (compile-struct-value-pattern opt-pattern key)
           [~(unless (has-key? ,$dict ,key) (as-macro ,fail))
            ;(compile-struct-value-pattern pattern key)])))]))
 
@@ -392,3 +392,4 @@
           (as-macro @fail)
           true)
         :ok))))
+
