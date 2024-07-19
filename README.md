@@ -260,7 +260,7 @@ But this will fail to compile:
 
 You can use `_` to perform structural matching without binding any new symbols.
 
-## `(= value)`, `(unquote value)`
+## `(= value)`
 
 Check a value for equality:
 
@@ -270,14 +270,7 @@ Check a value for equality:
   (= origin) :origin)
 ```
 
-Or:
-
-```janet
-(pat/match point
-  ,origin :origin)
-```
-
-These are equivalent to:
+This is equivalent to:
 
 ```janet
 (pat/match point
@@ -285,6 +278,29 @@ These are equivalent to:
 ```
 
 But a little more convenient to write.
+
+## `(unquote value)`
+
+You can use unquote in order to create first-class patterns.
+
+`unquote` uses `eval` in order to evaluate the pattern, so it will not work if you want to reference a variable that is defined in a lexical scope (i.e., a variable that is not an environment entry). So this will work:
+
+```janet
+(def my-pattern ~[x y])
+(pat/match [1 2]
+  ,my-pattern (+ x y))
+```
+
+But this will not:
+
+```janet
+(let [my-pattern ~[x y]]
+  (pat/match [1 2]
+    ,my-pattern (+ x y)))
+```
+
+
+Another way to say this is that you cannot create dynamic patterns at runtime. The pattern you're splicing in must be known at compile time.
 
 ## `(not pat)`
 

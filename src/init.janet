@@ -189,7 +189,7 @@
     'short-fn (compile-predicate ;args)
     'quote (compile-equality pattern)
     'quasiquote (compile-equality pattern)
-    'unquote (compile-equality ;args)
+    'unquote (compile-pattern (eval ;args))
     '= (compile-equality ;args)
     'not= (compile-inequality ;args)
     'map (compile-map ;args)

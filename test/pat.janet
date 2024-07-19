@@ -130,9 +130,10 @@
   (test (match 'foo ~foo :ok) :ok)
   (test (match [10] ~(,x) :ok) :ok))
 
+# this must reference an environment entry in order to work
+(def pattern '[x y])
 (deftest "unquote patterns"
-  (def x 10)
-  (test (match 10 ,x :ok) :ok))
+  (test (match [1 2] ,pattern (+ x y)) 3))
 
 (deftest "quoted patterns respect tuple bracketedness"
   (test-error (match ['foo] '[foo] :ok) "(foo) did not match"))
