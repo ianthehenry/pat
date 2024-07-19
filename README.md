@@ -7,7 +7,7 @@ A supercharged `match` macro for Janet. Install it with `jpm`:
 (declare-project
   :dependencies [
     {:url "https://github.com/ianthehenry/pat.git"
-     :tag "v1.0.1"}
+     :tag "v2.0.0"}
   ])
 ```
 
@@ -334,6 +334,10 @@ Call `f` with the value being matched, and match the pattern against the result,
 ```
 
 # Changelog
+
+## v2.0.0 2024-07-18
+
+- Breaking change: `unquote` now splices first-class patterns, instead of checking for equality. Previously, the patterns `(= foo)` and `,foo` were identical. Now the latter assumes `foo` evaluates to a pattern.
 
 ## v1.0.1 2024-05-15
 
