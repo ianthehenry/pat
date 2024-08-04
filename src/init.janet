@@ -161,16 +161,16 @@
 
 (defn- compile-predicate [body]
   [(if (definitely-nullary? body)
-     ~(unless (,check ,body ,(subject))
+     ~(as-macro ,unless (,check ,body ,(subject))
        (as-macro ,fail))
-     ~(unless (,check-predicate (short-fn ,body) ,(subject))
+     ~(as-macro ,unless (,check-predicate (short-fn ,body) ,(subject))
        (as-macro ,fail)))])
 
 (defn- compile-equality [& args]
-  [~(unless (= ,(subject) ,;args) (as-macro ,fail))])
+  [~(as-macro ,unless (,= ,(subject) ,;args) (as-macro ,fail))])
 
 (defn- compile-inequality [& args]
-  [~(when (= ,(subject) ,;args) (as-macro ,fail))])
+  [~(as-macro ,when (,= ,(subject) ,;args) (as-macro ,fail))])
 
 (defn- compile-map [f pattern]
   (with-syms [$subject]
@@ -210,12 +210,12 @@
   (with-syms [$list]
     [~(as-macro ,alias ,$list ,(subject))
      ;(with-subject $list
-      [~(unless (indexed? ,(subject))
+      [~(as-macro ,unless (,indexed? ,(subject))
           (as-macro ,fail))
        (if rest-index
-        ~(unless (>= (length ,(subject)) ,rest-index)
+        ~(as-macro ,unless (,>= (,length ,(subject)) ,rest-index)
            (as-macro ,fail))
-        ~(unless (= (length ,(subject)) ,(length patterns))
+        ~(as-macro ,unless (,= (,length ,(subject)) ,(length patterns))
            (as-macro ,fail)))
        ;(catseq [[i pattern] :pairs patterns :when (or (not rest-index) (< i rest-index))]
           (with-subject ~(,$list ,i)
@@ -248,7 +248,7 @@
        (with-subject ~(,$dict ,key)
         (if-let [opt-pattern (optional-pattern pattern)]
           (compile-struct-value-pattern opt-pattern key)
-          [~(unless (has-key? ,$dict ,key) (as-macro ,fail))
+          [~(as-macro ,unless (has-key? ,$dict ,key) (as-macro ,fail))
            ;(compile-struct-value-pattern pattern key)])))]))
 
 (defn- compile-symbol-pattern [pattern]
@@ -287,7 +287,7 @@
       (seq [[pattern expr] :in (partition 2 cases)]
         [;(compile-pattern pattern) expr])
       (if (= default-value no-default)
-        ~(errorf "%q did not match" ,(subject))
+        ~(,errorf "%q did not match" ,(subject))
         default-value))))
 
 # ---------------------------------------------------
@@ -308,9 +308,9 @@
     (scope
       (do
         (as-macro @alias <1> foo)
-        (unless (indexed? <1>)
+        (as-macro @unless (@indexed? <1>)
           (as-macro @fail))
-        (unless (= (length <1>) 2)
+        (as-macro @unless (@= (@length <1>) 2)
           (as-macro @fail))
         (def x (<1> 0))
         (def y (<1> 1))
@@ -320,9 +320,9 @@
     (scope
       (do
         (as-macro @alias <1> foo)
-        (unless (indexed? <1>)
+        (as-macro @unless (@indexed? <1>)
           (as-macro @fail))
-        (unless (>= (length <1>) 2)
+        (as-macro @unless (@>= (@length <1>) 2)
           (as-macro @fail))
         (def x (<1> 0))
         (def y (<1> 1))
@@ -332,9 +332,9 @@
     (scope
       (do
         (as-macro @alias <1> foo)
-        (unless (indexed? <1>)
+        (as-macro @unless (@indexed? <1>)
           (as-macro @fail))
-        (unless (>= (length <1>) 2)
+        (as-macro @unless (@>= (@length <1>) 2)
           (as-macro @fail))
         (def x (<1> 0))
         (def y (<1> 1))
@@ -346,14 +346,14 @@
     (scope
       (do
         (as-macro @alias <1> foo)
-        (unless (indexed? <1>)
+        (as-macro @unless (@indexed? <1>)
           (as-macro @fail))
-        (unless (= (length <1>) 2)
+        (as-macro @unless (@= (@length <1>) 2)
           (as-macro @fail))
         (as-macro @alias <2> (<1> 0))
-        (unless (indexed? <2>)
+        (as-macro @unless (@indexed? <2>)
           (as-macro @fail))
-        (unless (= (length <2>) 2)
+        (as-macro @unless (@= (@length <2>) 2)
           (as-macro @fail))
         (def x (<2> 0))
         (def y (<2> 1))
@@ -362,13 +362,13 @@
 
 (deftest "multiple patterns"
   (test-macro (match foo x x y y)
-    (let [<1> (as-macro @scope (do (def x foo) x) (let [<2> (as-macro @scope (do (def y foo) y) (errorf "%q did not match" foo))]))])))
+    (let [<1> (as-macro @scope (do (def x foo) x) (let [<2> (as-macro @scope (do (def y foo) y) (@errorf "%q did not match" foo))]))])))
 
 (deftest "or expansion"
   (test-macro (match1 10 (or []) 20)
     (scope
       (do
-        (let [<1> (as-macro @scope (do (as-macro @alias <2> 10) (unless (indexed? <2>) (as-macro @fail)) (unless (= (length <2>) 0) (as-macro @fail))) (as-macro @fail))])
+        (let [<1> (as-macro @scope (do (as-macro @alias <2> 10) (as-macro @unless (@indexed? <2>) (as-macro @fail)) (as-macro @unless (@= (@length <2>) 0) (as-macro @fail))) (as-macro @fail))])
         20))))
 
 (deftest "dictionary pattern expansion"
@@ -376,7 +376,7 @@
     (scope
       (do
         (as-macro @alias <1> foo)
-        (unless (has-key? <1> :x)
+        (as-macro @unless (has-key? <1> :x)
           (as-macro @fail))
         (def x (<1> :x))
         x))))
@@ -387,7 +387,7 @@
       (do
         (as-macro @scope
           (do
-            (unless (= foo nil)
+            (as-macro @unless (@= foo nil)
               (as-macro @fail)))
           (as-macro @fail)
           true)

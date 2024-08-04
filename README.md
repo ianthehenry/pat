@@ -7,7 +7,7 @@ A supercharged `match` macro for Janet. Install it with `jpm`:
 (declare-project
   :dependencies [
     {:url "https://github.com/ianthehenry/pat.git"
-     :tag "v2.0.0"}
+     :tag "v2.0.1"}
   ])
 ```
 
@@ -334,6 +334,10 @@ Call `f` with the value being matched, and match the pattern against the result,
 ```
 
 # Changelog
+
+## v2.0.1 2024-08-04
+
+- Macro expansion is more hygienic. In particular it works even in contexts that have shadowed `length` or `=`.
 
 ## v2.0.0 2024-07-18
 
